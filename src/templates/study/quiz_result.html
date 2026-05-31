@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Quiz Result | Smart Study AI{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm text-center">
+            <div class="card-body p-5">
+                <h1 class="h3">Quiz Complete</h1>
+                <p class="display-4 fw-bold text-primary">{{ percentage|floatformat:0 }}%</p>
+                <p>You answered {{ score }} out of {{ total }} questions correctly.</p>
+                <div class="alert alert-info">{{ recommendation }}</div>
+                <a class="btn btn-accent" href="{% url 'quiz_mode' material.id %}">Try Again</a>
+                <a class="btn btn-outline-primary" href="{% url 'material_detail' material.id %}">Back to Material</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

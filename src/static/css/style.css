@@ -1,0 +1,70 @@
+:root {
+    --dark-blue: #12355b;
+    --light-blue: #eaf4ff;
+    --green: #2f9e62;
+}
+
+body {
+    background: #f7fbff;
+    color: #18324b;
+}
+
+.navbar {
+    background: var(--dark-blue);
+}
+
+.hero {
+    background: var(--light-blue);
+    border-radius: 1.5rem;
+}
+
+.card {
+    border: 0;
+    border-radius: 1rem;
+}
+
+.dashboard-card {
+    border-top: 4px solid var(--green);
+}
+
+.btn-accent {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+}
+
+.btn-accent:hover {
+    background: #278653;
+    border-color: #278653;
+    color: white;
+}
+
+input,
+textarea,
+select {
+    display: block;
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+}
+
+.helptext {
+    color: #6c757d;
+    display: block;
+    font-size: 0.85rem;
+}
+
+.errorlist {
+    color: #b02a37;
+}
+
+.content-text {
+    white-space: normal;
+}
+
+.timer {
+    color: var(--dark-blue);
+    font-size: 5rem;
+    font-weight: 700;
+}

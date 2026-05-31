@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ material.title }} | Smart Study AI{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between gap-3 mb-4">
+    <div>
+        <span class="badge text-bg-primary">{{ material.subject }}</span>
+        <h1 class="mt-2">{{ material.title }}</h1>
+    </div>
+    <div>
+        <a class="btn btn-accent" href="{% url 'study_mode' material.id %}">Study Flashcards</a>
+        <a class="btn btn-primary" href="{% url 'quiz_mode' material.id %}">Take Quiz</a>
+        <a class="btn btn-outline-primary" href="{% url 'material_edit' material.id %}">Edit</a>
+        <a class="btn btn-outline-danger" href="{% url 'material_delete' material.id %}">Delete</a>
+    </div>
+</div>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h4">Generated Summary</h2>
+        <p class="mb-0">{{ material.summary|default:"No summary could be generated." }}</p>
+    </div>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="h4">Original Notes</h2>
+        <p class="content-text mb-0">{{ material.content|linebreaksbr }}</p>
+    </div>
+</div>
+{% endblock %}

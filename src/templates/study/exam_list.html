@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Exams | Smart Study AI{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Exams</h1><a class="btn btn-accent" href="{% url 'exam_create' %}">Add Exam</a>
+</div>
+<div class="row g-4">
+    {% for exam in exams %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <span class="badge text-bg-primary">{{ exam.subject }}</span>
+                <h2 class="h5 mt-2">{{ exam.title }}</h2>
+                <p>{{ exam.exam_date }}</p>
+                <a class="btn btn-outline-primary" href="{% url 'exam_detail' exam.id %}">Open Details</a>
+            </div></div>
+        </div>
+    {% empty %}
+        <p>No exams added yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

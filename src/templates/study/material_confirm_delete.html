@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Delete Material | Smart Study AI{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h1 class="h3">Delete Material</h1>
+        <p>Are you sure you want to delete <strong>{{ material.title }}</strong>? Its flashcards, quiz questions, results, and connected exams will also be deleted.</p>
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">Yes, Delete</button>
+            <a class="btn btn-outline-secondary" href="{% url 'material_detail' material.id %}">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

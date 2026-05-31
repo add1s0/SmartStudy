@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Materials | Smart Study AI{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Study Materials</h1>
+    <a class="btn btn-accent" href="{% url 'material_create' %}">Add Material</a>
+</div>
+<div class="row g-4">
+    {% for material in materials %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <span class="badge text-bg-primary mb-2">{{ material.subject }}</span>
+                    <h2 class="h5">{{ material.title }}</h2>
+                    <p class="text-muted small">{{ material.created_at|date:"M d, Y" }}</p>
+                    <a href="{% url 'material_detail' material.id %}" class="btn btn-outline-primary">Open</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>You have no study materials yet. Add your first notes to get started.</p>
+    {% endfor %}
+</div>
+{% endblock %}

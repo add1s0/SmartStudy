@@ -1,0 +1,254 @@
+import random
+from datetime import date
+
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.db.models import Avg
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .forms import ExamForm, RegisterForm, StudyMaterialForm
+from .models import Exam, Flashcard, QuizQuestion, QuizResult, StudyMaterial
+from .utils import generate_flashcards, generate_quiz_questions, generate_summary
+
+
+def home(request: HttpRequest) -> HttpResponse:
+    """Display the public landing page."""
+    return render(request, "study/home.html")
+
+
+def register(request: HttpRequest) -> HttpResponse:
+    """Create a user account and log the student in."""
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("dashboard")
+    else:
+        form = RegisterForm()
+    return render(request, "registration/register.html", {"form": form})
+
+
+@login_required
+def dashboard(request: HttpRequest) -> HttpResponse:
+    """Display a quick overview of the student's study data."""
+    materials = StudyMaterial.objects.filter(user=request.user)
+    exams = Exam.objects.filter(user=request.user).order_by("exam_date")
+    context = {
+        "total_materials": materials.count(),
+        "total_exams": exams.count(),
+        "nearest_exam": exams.filter(exam_date__gte=date.today()).first(),
+    }
+    return render(request, "study/dashboard.html", context)
+
+
+@login_required
+def material_list(request: HttpRequest) -> HttpResponse:
+    """List only the signed-in student's materials."""
+    materials = StudyMaterial.objects.filter(user=request.user).order_by("-created_at")
+    return render(request, "study/material_list.html", {"materials": materials})
+
+
+def _create_generated_content(material: StudyMaterial) -> None:
+    """Create summary, flashcards, and quiz questions for one material."""
+    material.summary = generate_summary(material.content)
+    material.save(update_fields=["summary"])
+    Flashcard.objects.bulk_create(
+        [Flashcard(material=material, **card) for card in generate_flashcards(material.content)]
+    )
+    QuizQuestion.objects.bulk_create(
+        [
+            QuizQuestion(material=material, **question)
+            for question in generate_quiz_questions(material.content)
+        ]
+    )
+
+
+@login_required
+def material_create(request: HttpRequest) -> HttpResponse:
+    """Add material and automatically generate study activities."""
+    if request.method == "POST":
+        form = StudyMaterialForm(request.POST)
+        if form.is_valid():
+            material = form.save(commit=False)
+            material.user = request.user
+            material.save()
+            _create_generated_content(material)
+            return redirect("material_detail", material_id=material.id)
+    else:
+        form = StudyMaterialForm()
+    return render(request, "study/material_form.html", {"form": form, "title": "Add Material"})
+
+
+@login_required
+def material_detail(request: HttpRequest, material_id: int) -> HttpResponse:
+    """Show one material owned by the signed-in student."""
+    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    return render(request, "study/material_detail.html", {"material": material})
+
+
+@login_required
+def material_edit(request: HttpRequest, material_id: int) -> HttpResponse:
+    """Edit material and regenerate its activities when the text changes."""
+    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    if request.method == "POST":
+        form = StudyMaterialForm(request.POST, instance=material)
+        if form.is_valid():
+            form.save()
+            material.flashcards.all().delete()
+            material.quiz_questions.all().delete()
+            _create_generated_content(material)
+            return redirect("material_detail", material_id=material.id)
+    else:
+        form = StudyMaterialForm(instance=material)
+    return render(request, "study/material_form.html", {"form": form, "title": "Edit Material"})
+
+
+@login_required
+def material_delete(request: HttpRequest, material_id: int) -> HttpResponse:
+    """Delete a material after confirmation."""
+    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    if request.method == "POST":
+        material.delete()
+        return redirect("material_list")
+    return render(request, "study/material_confirm_delete.html", {"material": material})
+
+
+@login_required
+def study_mode(request: HttpRequest, material_id: int) -> HttpResponse:
+    """Show flashcards and record known or unknown responses."""
+    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    if request.method == "POST":
+        flashcard = get_object_or_404(Flashcard, id=request.POST.get("flashcard_id"), material=material)
+        if request.POST.get("answer") == "known":
+            flashcard.known_count += 1
+        elif request.POST.get("answer") == "unknown":
+            flashcard.unknown_count += 1
+        flashcard.save(update_fields=["known_count", "unknown_count"])
+        return redirect("study_mode", material_id=material.id)
+    return render(request, "study/study_mode.html", {"material": material})
+
+
+@login_required
+def quiz_mode(request: HttpRequest, material_id: int) -> HttpResponse:
+    """Display a quiz, calculate its score, and save the result."""
+    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    questions = list(material.quiz_questions.all())
+    if request.method == "POST":
+        score = sum(
+            request.POST.get(f"question_{question.id}") == question.correct_answer
+            for question in questions
+        )
+        total = len(questions)
+        percentage = (score / total * 100) if total else 0
+        QuizResult.objects.create(
+            user=request.user,
+            material=material,
+            score=score,
+            total_questions=total,
+            percentage=percentage,
+        )
+        if percentage >= 80:
+            recommendation = "Excellent preparation"
+        elif percentage >= 50:
+            recommendation = "More revision recommended"
+        else:
+            recommendation = "Study the material again"
+        return render(
+            request,
+            "study/quiz_result.html",
+            {
+                "material": material,
+                "score": score,
+                "total": total,
+                "percentage": percentage,
+                "recommendation": recommendation,
+            },
+        )
+    for question in questions:
+        question.options = [
+            question.correct_answer,
+            question.wrong_answer1,
+            question.wrong_answer2,
+            question.wrong_answer3,
+        ]
+        random.shuffle(question.options)
+    return render(request, "study/quiz_mode.html", {"material": material, "questions": questions})
+
+
+@login_required
+def exam_list(request: HttpRequest) -> HttpResponse:
+    """List the student's exams."""
+    exams = Exam.objects.filter(user=request.user).order_by("exam_date")
+    return render(request, "study/exam_list.html", {"exams": exams})
+
+
+@login_required
+def exam_create(request: HttpRequest) -> HttpResponse:
+    """Add an exam connected to one of the student's materials."""
+    if request.method == "POST":
+        form = ExamForm(request.POST, user=request.user)
+        if form.is_valid():
+            exam = form.save(commit=False)
+            exam.user = request.user
+            exam.save()
+            return redirect("exam_detail", exam_id=exam.id)
+    else:
+        form = ExamForm(user=request.user)
+    return render(request, "study/exam_form.html", {"form": form})
+
+
+def _preparedness(material: StudyMaterial) -> float:
+    """Calculate preparedness from quiz and flashcard practice."""
+    average_quiz = material.quiz_results.aggregate(Avg("percentage"))["percentage__avg"] or 0
+    cards = material.flashcards.all()
+    known = sum(card.known_count for card in cards)
+    attempts = sum(card.known_count + card.unknown_count for card in cards)
+    flashcard_success = (known / attempts * 100) if attempts else 0
+    return (average_quiz + flashcard_success) / 2
+
+
+@login_required
+def exam_detail(request: HttpRequest, exam_id: int) -> HttpResponse:
+    """Show exam readiness and a simple study plan."""
+    exam = get_object_or_404(Exam, id=exam_id, user=request.user)
+    preparedness = _preparedness(exam.material)
+    if preparedness >= 80:
+        recommendation = "Ready for exam"
+    elif preparedness >= 50:
+        recommendation = "Need some revision"
+    else:
+        recommendation = "Need more preparation"
+    context = {
+        "exam": exam,
+        "days_remaining": (exam.exam_date - date.today()).days,
+        "preparedness": preparedness,
+        "recommendation": recommendation,
+        "study_plan": [
+            "Review Material",
+            "Flashcards",
+            "Quiz Practice",
+            "Review Mistakes",
+            "Final Revision",
+        ],
+    }
+    return render(request, "study/exam_detail.html", context)
+
+
+@login_required
+def statistics(request: HttpRequest) -> HttpResponse:
+    """Display study statistics for the signed-in student."""
+    results = QuizResult.objects.filter(user=request.user)
+    context = {
+        "total_materials": StudyMaterial.objects.filter(user=request.user).count(),
+        "total_quizzes": results.count(),
+        "average_score": results.aggregate(Avg("percentage"))["percentage__avg"] or 0,
+    }
+    return render(request, "study/statistics.html", context)
+
+
+@login_required
+def focus_mode(request: HttpRequest) -> HttpResponse:
+    """Display the Pomodoro timer."""
+    return render(request, "study/focus_mode.html")

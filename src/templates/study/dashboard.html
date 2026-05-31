@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Smart Study AI{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-1">Welcome, {{ user.username }}!</h1>
+        <p class="text-muted mb-0">Here is your study overview.</p>
+    </div>
+    <div>
+        <a class="btn btn-accent" href="{% url 'material_create' %}">Add Material</a>
+        <a class="btn btn-primary" href="{% url 'exam_create' %}">Add Exam</a>
+        <a class="btn btn-outline-primary" href="{% url 'statistics' %}">Statistics</a>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card dashboard-card shadow-sm h-100"><div class="card-body">
+            <p class="text-muted">Total Study Materials</p><h2>{{ total_materials }}</h2>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card dashboard-card shadow-sm h-100"><div class="card-body">
+            <p class="text-muted">Total Exams</p><h2>{{ total_exams }}</h2>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card dashboard-card shadow-sm h-100"><div class="card-body">
+            <p class="text-muted">Nearest Exam</p>
+            {% if nearest_exam %}
+                <h2 class="h4">{{ nearest_exam.title }}</h2>
+                <p class="mb-0">{{ nearest_exam.exam_date }}</p>
+            {% else %}
+                <h2 class="h4">No upcoming exams</h2>
+            {% endif %}
+        </div></div>
+    </div>
+</div>
+{% endblock %}
