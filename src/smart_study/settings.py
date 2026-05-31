@@ -27,7 +27,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "smart_study_ai.urls"
+ROOT_URLCONF = "smart_study.urls"
 
 TEMPLATES = [
     {
@@ -44,7 +44,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "smart_study_ai.wsgi.application"
+WSGI_APPLICATION = "smart_study.wsgi.application"
 
 DATABASES = {
     "default": {

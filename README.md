@@ -64,7 +64,7 @@ pytest
 SmartStudy/
 |-- src/
 |   |-- manage.py
-|   |-- smart_study_ai/
+|   |-- smart_study/
 |   |-- study/
 |   |-- static/
 |   `-- templates/
