@@ -13,6 +13,10 @@ body {
     min-height: 100vh;
 }
 
+.home-page {
+    background: var(--rosy);
+}
+
 .background-page {
     background-attachment: fixed;
     background-image: url("/static/images/background2.png");
