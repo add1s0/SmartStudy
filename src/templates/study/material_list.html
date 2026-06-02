@@ -13,7 +13,10 @@
                     <span class="badge text-bg-primary mb-2">{{ material.subject }}</span>
                     <h2 class="h5">{{ material.title }}</h2>
                     <p class="text-muted small">{{ material.created_at|date:"M d, Y" }}</p>
-                    <a href="{% url 'material_detail' material.id %}" class="btn btn-outline-primary">Open</a>
+                    <div class="btn-group" role="group" aria-label="Material actions">
+                        <a href="{% url 'material_detail' material.id %}" class="btn btn-outline-primary">Open</a>
+                        <a href="{% url 'material_delete' material.id %}" class="btn btn-outline-danger">Delete</a>
+                    </div>
                 </div>
             </div>
         </div>
