@@ -1,7 +1,7 @@
 # Smart Study
 
 Smart Study is a beginner-friendly Django web application for organizing study
-materials and preparing for exams. It creates summaries, flashcards, and quizzes
+materials and preparing for exams. It creates summaries and quizzes
 from a student's notes using simple Python functions. It does not use an external
 AI service.
 
@@ -9,8 +9,7 @@ AI service.
 
 - Register, login, and logout
 - Private study materials with full create, read, update, and delete actions
-- Automatically generated summaries, flashcards, and multiple-choice quizzes
-- Flashcard practice with known and unknown counters
+- Automatically generated summaries and multiple-choice quizzes
 - Saved quiz results with recommendations
 - Exam tracking, preparedness score, and a simple study plan
 - Statistics page with progress bars

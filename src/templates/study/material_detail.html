@@ -7,7 +7,6 @@
         <h1 class="mt-2">{{ material.title }}</h1>
     </div>
     <div>
-        <a class="btn btn-accent" href="{% url 'study_mode' material.id %}">Флашкарти</a>
         <a class="btn btn-primary" href="{% url 'quiz_mode' material.id %}">Тест</a>
         <a class="btn btn-outline-primary" href="{% url 'material_edit' material.id %}">Редактирай</a>
         <a class="btn btn-outline-danger" href="{% url 'material_delete' material.id %}">Изтрий</a>

@@ -21,28 +21,6 @@ def generate_summary(text: str) -> str:
     return " ".join(sentences[:3])
 
 
-def _flashcard_question(sentence: str) -> str:
-    """Turn a sentence into a simple fill-in-the-blank question."""
-    words = sentence.split()
-    hidden_words = 1
-    if words and words[0].lower() in {"a", "an", "the"} and len(words) > 1:
-        hidden_words = 2
-    visible_text = " ".join(words[hidden_words:])
-    return f"Попълнете липсващата част: _____ {visible_text}"
-
-
-def generate_flashcards(text: str) -> list[dict]:
-    """Create simple question-and-answer flashcards from meaningful sentences."""
-    sentences = _meaningful_sentences(text)
-    return [
-        {
-            "question": _flashcard_question(sentence),
-            "answer": sentence,
-        }
-        for sentence in sentences[:5]
-    ]
-
-
 def generate_quiz_questions(text: str) -> list[dict]:
     """Create more meaningful quiz questions from the material's sentences."""
     sentences = _meaningful_sentences(text)

@@ -15,7 +15,6 @@ urlpatterns = [
         views.material_delete,
         name="material_delete",
     ),
-    path("study/<int:material_id>/", views.study_mode, name="study_mode"),
     path("quiz/<int:material_id>/", views.quiz_mode, name="quiz_mode"),
     path("exams/", views.exam_list, name="exam_list"),
     path("exams/add/", views.exam_create, name="exam_create"),

@@ -8,8 +8,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ExamForm, RegisterForm, StudyMaterialForm
-from .models import Exam, Flashcard, QuizQuestion, QuizResult, StudyMaterial
-from .utils import generate_flashcards, generate_quiz_questions, generate_summary
+from .models import Exam, QuizQuestion, QuizResult, StudyMaterial
+from .utils import generate_quiz_questions, generate_summary
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -51,12 +51,9 @@ def material_list(request: HttpRequest) -> HttpResponse:
 
 
 def _create_generated_content(material: StudyMaterial) -> None:
-    """Create summary, flashcards, and quiz questions for one material."""
+    """Create a summary and quiz questions for one material."""
     material.summary = generate_summary(material.content)
     material.save(update_fields=["summary"])
-    Flashcard.objects.bulk_create(
-        [Flashcard(material=material, **card) for card in generate_flashcards(material.content)]
-    )
     QuizQuestion.objects.bulk_create(
         [
             QuizQuestion(material=material, **question)
@@ -67,16 +64,12 @@ def _create_generated_content(material: StudyMaterial) -> None:
 
 def _ensure_localized_generated_content(material: StudyMaterial) -> None:
     """Regenerate study content if old prompts are still stored."""
-    has_old_flashcards = material.flashcards.filter(
-        question__contains="Complete this statement"
-    ).exists()
     has_old_quiz_questions = material.quiz_questions.filter(
         question__contains="Which statement correctly describes"
     ).exists() or material.quiz_questions.filter(
         question__contains="Кое твърдение описва правилно тема"
     ).exists()
-    if has_old_flashcards or has_old_quiz_questions:
-        material.flashcards.all().delete()
+    if has_old_quiz_questions:
         material.quiz_questions.all().delete()
         _create_generated_content(material)
 
@@ -112,7 +105,6 @@ def material_edit(request: HttpRequest, material_id: int) -> HttpResponse:
         form = StudyMaterialForm(request.POST, instance=material)
         if form.is_valid():
             form.save()
-            material.flashcards.all().delete()
             material.quiz_questions.all().delete()
             _create_generated_content(material)
             return redirect("material_detail", material_id=material.id)
@@ -129,22 +121,6 @@ def material_delete(request: HttpRequest, material_id: int) -> HttpResponse:
         material.delete()
         return redirect("material_list")
     return render(request, "study/material_confirm_delete.html", {"material": material})
-
-
-@login_required
-def study_mode(request: HttpRequest, material_id: int) -> HttpResponse:
-    """Show flashcards and record known or unknown responses."""
-    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
-    _ensure_localized_generated_content(material)
-    if request.method == "POST":
-        flashcard = get_object_or_404(Flashcard, id=request.POST.get("flashcard_id"), material=material)
-        if request.POST.get("answer") == "known":
-            flashcard.known_count += 1
-        elif request.POST.get("answer") == "unknown":
-            flashcard.unknown_count += 1
-        flashcard.save(update_fields=["known_count", "unknown_count"])
-        return redirect("study_mode", material_id=material.id)
-    return render(request, "study/study_mode.html", {"material": material})
 
 
 @login_required
@@ -218,13 +194,8 @@ def exam_create(request: HttpRequest) -> HttpResponse:
 
 
 def _preparedness(material: StudyMaterial) -> float:
-    """Calculate preparedness from quiz and flashcard practice."""
-    average_quiz = material.quiz_results.aggregate(Avg("percentage"))["percentage__avg"] or 0
-    cards = material.flashcards.all()
-    known = sum(card.known_count for card in cards)
-    attempts = sum(card.known_count + card.unknown_count for card in cards)
-    flashcard_success = (known / attempts * 100) if attempts else 0
-    return (average_quiz + flashcard_success) / 2
+    """Calculate preparedness from the average quiz score."""
+    return material.quiz_results.aggregate(Avg("percentage"))["percentage__avg"] or 0
 
 
 @login_required
@@ -245,7 +216,6 @@ def exam_detail(request: HttpRequest, exam_id: int) -> HttpResponse:
         "recommendation": recommendation,
         "study_plan": [
             "Преглед на материала",
-            "Флашкарти",
             "Практика с тестове",
             "Преглед на грешките",
             "Крайно повторение",

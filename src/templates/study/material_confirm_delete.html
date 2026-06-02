@@ -4,7 +4,7 @@
 <div class="card shadow-sm">
     <div class="card-body p-4">
         <h1 class="h3">Изтриване на материал</h1>
-        <p>Сигурни ли сте, че искате да изтриете <strong>{{ material.title }}</strong>? Неговите флашкарти, тестови въпроси, резултати и свързани изпити също ще бъдат изтрити.</p>
+        <p>Сигурни ли сте, че искате да изтриете <strong>{{ material.title }}</strong>? Неговите тестови въпроси, резултати и свързани изпити също ще бъдат изтрити.</p>
         <form method="post">
             {% csrf_token %}
             <button class="btn btn-danger" type="submit">Да, изтрий</button>

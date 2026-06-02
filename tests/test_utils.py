@@ -1,5 +1,5 @@
 """Tests for the local content generation helpers."""
-from study.utils import generate_flashcards, generate_quiz_questions, generate_summary
+from study.utils import generate_quiz_questions, generate_summary
 
 SAMPLE_TEXT = (
     "Photosynthesis allows plants to turn light energy into chemical energy. "
@@ -21,30 +21,6 @@ def test_summary_uses_first_three_meaningful_sentences() -> None:
 def test_summary_returns_short_text_when_no_long_sentence_exists() -> None:
     """Short notes should still appear instead of producing an empty summary."""
     assert generate_summary("Very short.") == "Very short."
-
-
-def test_flashcards_are_created_from_sentences() -> None:
-    """Each meaningful fact should become one simple flashcard."""
-    flashcards = generate_flashcards(SAMPLE_TEXT)
-
-    assert len(flashcards) == 4
-    assert flashcards[0]["question"] == (
-        "Complete this statement from the material: _____ allows plants to turn "
-        "light energy into chemical energy."
-    )
-    assert "Photosynthesis" in flashcards[0]["answer"]
-
-
-def test_flashcard_question_hides_article_and_topic() -> None:
-    """An opening article should be hidden together with the topic word."""
-    flashcards = generate_flashcards(
-        "The mitochondria produces energy needed by the cell."
-    )
-
-    assert flashcards[0]["question"] == (
-        "Complete this statement from the material: _____ produces energy "
-        "needed by the cell."
-    )
 
 
 def test_quiz_questions_contain_four_answers() -> None:

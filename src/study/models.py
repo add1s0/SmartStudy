@@ -16,21 +16,6 @@ class StudyMaterial(models.Model):
         return self.title
 
 
-class Flashcard(models.Model):
-    """A generated flashcard for one study material."""
-
-    material = models.ForeignKey(
-        StudyMaterial, on_delete=models.CASCADE, related_name="flashcards"
-    )
-    question = models.CharField(max_length=300)
-    answer = models.TextField()
-    known_count = models.PositiveIntegerField(default=0)
-    unknown_count = models.PositiveIntegerField(default=0)
-
-    def __str__(self) -> str:
-        return self.question
-
-
 class QuizQuestion(models.Model):
     """A generated multiple-choice question."""
 
