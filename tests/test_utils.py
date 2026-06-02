@@ -28,8 +28,23 @@ def test_flashcards_are_created_from_sentences() -> None:
     flashcards = generate_flashcards(SAMPLE_TEXT)
 
     assert len(flashcards) == 4
-    assert flashcards[0]["question"].startswith("What is an important fact")
+    assert flashcards[0]["question"] == (
+        "Complete this statement from the material: _____ allows plants to turn "
+        "light energy into chemical energy."
+    )
     assert "Photosynthesis" in flashcards[0]["answer"]
+
+
+def test_flashcard_question_hides_article_and_topic() -> None:
+    """An opening article should be hidden together with the topic word."""
+    flashcards = generate_flashcards(
+        "The mitochondria produces energy needed by the cell."
+    )
+
+    assert flashcards[0]["question"] == (
+        "Complete this statement from the material: _____ produces energy "
+        "needed by the cell."
+    )
 
 
 def test_quiz_questions_contain_four_answers() -> None:

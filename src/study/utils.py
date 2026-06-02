@@ -20,15 +20,25 @@ def generate_summary(text: str) -> str:
     return " ".join(sentences[:3])
 
 
+def _flashcard_question(sentence: str) -> str:
+    """Turn a sentence into a simple fill-in-the-blank question."""
+    words = sentence.split()
+    hidden_words = 1
+    if words and words[0].lower() in {"a", "an", "the"} and len(words) > 1:
+        hidden_words = 2
+    visible_text = " ".join(words[hidden_words:])
+    return f"Complete this statement from the material: _____ {visible_text}"
+
+
 def generate_flashcards(text: str) -> list[dict]:
     """Create simple question-and-answer flashcards from meaningful sentences."""
     sentences = _meaningful_sentences(text)
     return [
         {
-            "question": f"What is an important fact about topic {index}?",
+            "question": _flashcard_question(sentence),
             "answer": sentence,
         }
-        for index, sentence in enumerate(sentences[:5], start=1)
+        for sentence in sentences[:5]
     ]
 
 
