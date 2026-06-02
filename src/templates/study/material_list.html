@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Materials | Smart Study AI{% endblock %}
+{% block title %}Материали | Smart Study{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Study Materials</h1>
-    <a class="btn btn-accent" href="{% url 'material_create' %}">Add Material</a>
+    <h1>Учебни материали</h1>
+    <a class="btn btn-accent" href="{% url 'material_create' %}">Нов материал</a>
 </div>
 <div class="row g-4">
     {% for material in materials %}
@@ -12,16 +12,16 @@
                 <div class="card-body">
                     <span class="badge text-bg-primary mb-2">{{ material.subject }}</span>
                     <h2 class="h5">{{ material.title }}</h2>
-                    <p class="text-muted small">{{ material.created_at|date:"M d, Y" }}</p>
+                    <p class="text-muted small">{{ material.created_at|date:"d.m.Y" }}</p>
                     <div class="btn-group" role="group" aria-label="Material actions">
-                        <a href="{% url 'material_detail' material.id %}" class="btn btn-outline-primary">Open</a>
-                        <a href="{% url 'material_delete' material.id %}" class="btn btn-outline-danger">Delete</a>
+                        <a href="{% url 'material_detail' material.id %}" class="btn btn-outline-primary">Отвори</a>
+                        <a href="{% url 'material_delete' material.id %}" class="btn btn-outline-danger">Изтрий</a>
                     </div>
                 </div>
             </div>
         </div>
     {% empty %}
-        <p>You have no study materials yet. Add your first notes to get started.</p>
+        <p>Все още нямаш учебни материали. Добави първите си бележки, за да започнеш.</p>
     {% endfor %}
 </div>
 {% endblock %}

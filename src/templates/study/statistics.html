@@ -1,21 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Statistics | Smart Study AI{% endblock %}
+{% block title %}Статистика | Smart Study{% endblock %}
 {% block content %}
-<h1 class="mb-4">Statistics</h1>
+<h1 class="mb-4">Статистика</h1>
 <div class="row g-4">
     <div class="col-md-4"><div class="card dashboard-card shadow-sm h-100"><div class="card-body">
-        <p class="text-muted">Total Materials</p><h2>{{ total_materials }}</h2>
+        <p class="text-muted">Общо материали</p><h2>{{ total_materials }}</h2>
     </div></div></div>
     <div class="col-md-4"><div class="card dashboard-card shadow-sm h-100"><div class="card-body">
-        <p class="text-muted">Quizzes Completed</p><h2>{{ total_quizzes }}</h2>
+        <p class="text-muted">Изпълнени тестове</p><h2>{{ total_quizzes }}</h2>
     </div></div></div>
     <div class="col-md-4"><div class="card dashboard-card shadow-sm h-100"><div class="card-body">
-        <p class="text-muted">Average Quiz Score</p><h2>{{ average_score|floatformat:0 }}%</h2>
+        <p class="text-muted">Среден резултат</p><h2>{{ average_score|floatformat:0 }}%</h2>
     </div></div></div>
 </div>
 <div class="card shadow-sm mt-4"><div class="card-body">
-    <h2 class="h4">Quiz Progress</h2>
-    <div class="progress mt-3" role="progressbar" aria-label="Average quiz score">
+    <h2 class="h4">Напредък в тестовете</h2>
+    <div class="progress mt-3" role="progressbar" aria-label="Среден резултат от тестовете">
         <div class="progress-bar bg-success" style="width: {{ average_score }}%">{{ average_score|floatformat:0 }}%</div>
     </div>
 </div></div>

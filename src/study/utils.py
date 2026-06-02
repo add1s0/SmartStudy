@@ -1,4 +1,5 @@
 """Small text helpers used instead of an external AI service."""
+import random
 import re
 
 
@@ -27,7 +28,7 @@ def _flashcard_question(sentence: str) -> str:
     if words and words[0].lower() in {"a", "an", "the"} and len(words) > 1:
         hidden_words = 2
     visible_text = " ".join(words[hidden_words:])
-    return f"Complete this statement from the material: _____ {visible_text}"
+    return f"Попълнете липсващата част: _____ {visible_text}"
 
 
 def generate_flashcards(text: str) -> list[dict]:
@@ -43,17 +44,31 @@ def generate_flashcards(text: str) -> list[dict]:
 
 
 def generate_quiz_questions(text: str) -> list[dict]:
-    """Create simple multiple-choice questions from meaningful sentences."""
+    """Create more meaningful quiz questions from the material's sentences."""
     sentences = _meaningful_sentences(text)
     questions: list[dict] = []
-    for index, sentence in enumerate(sentences[:5], start=1):
+    if len(sentences) < 2:
+        return []
+
+    for sentence in sentences[:5]:
+        distractors = [s for s in sentences if s != sentence]
+        if len(distractors) < 3:
+            distractors.extend(
+                [
+                    "Това твърдение не е споменато в материала.",
+                    "Обратното на това твърдение е вярно.",
+                    "Това твърдение принадлежи към друг предмет.",
+                ]
+            )
+        wrong_answers = random.sample(distractors, min(3, len(distractors)))
+
         questions.append(
             {
-                "question": f"Which statement correctly describes topic {index}?",
+                "question": "Кое от следните твърдения е вярно според материала?",
                 "correct_answer": sentence,
-                "wrong_answer1": "This topic is not mentioned in the material.",
-                "wrong_answer2": "The opposite of this statement is correct.",
-                "wrong_answer3": "This statement belongs to a different subject.",
+                "wrong_answer1": wrong_answers[0],
+                "wrong_answer2": wrong_answers[1],
+                "wrong_answer3": wrong_answers[2],
             }
         )
     return questions

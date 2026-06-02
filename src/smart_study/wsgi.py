@@ -1,4 +1,4 @@
-"""WSGI config for Smart Study AI."""
+"""WSGI config for Smart Study."""
 import os
 
 from django.core.wsgi import get_wsgi_application

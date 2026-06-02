@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Exams | Smart Study AI{% endblock %}
+{% block title %}Изпити | Smart Study{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Exams</h1><a class="btn btn-accent" href="{% url 'exam_create' %}">Add Exam</a>
+    <h1>Изпити</h1><a class="btn btn-accent" href="{% url 'exam_create' %}">Нов изпит</a>
 </div>
 <div class="row g-4">
     {% for exam in exams %}
@@ -10,12 +10,12 @@
             <div class="card shadow-sm h-100"><div class="card-body">
                 <span class="badge text-bg-primary">{{ exam.subject }}</span>
                 <h2 class="h5 mt-2">{{ exam.title }}</h2>
-                <p>{{ exam.exam_date }}</p>
-                <a class="btn btn-outline-primary" href="{% url 'exam_detail' exam.id %}">Open Details</a>
+                <p>{{ exam.exam_date|date:"d.m.Y" }}</p>
+                <a class="btn btn-outline-primary" href="{% url 'exam_detail' exam.id %}">Детайли</a>
             </div></div>
         </div>
     {% empty %}
-        <p>No exams added yet.</p>
+        <p>Все още няма добавени изпити.</p>
     {% endfor %}
 </div>
 {% endblock %}

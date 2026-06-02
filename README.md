@@ -1,6 +1,6 @@
-# Smart Study AI
+# Smart Study
 
-Smart Study AI is a beginner-friendly Django web application for organizing study
+Smart Study is a beginner-friendly Django web application for organizing study
 materials and preparing for exams. It creates summaries, flashcards, and quizzes
 from a student's notes using simple Python functions. It does not use an external
 AI service.

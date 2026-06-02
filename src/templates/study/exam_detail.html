@@ -1,21 +1,21 @@
 {% extends "base.html" %}
-{% block title %}{{ exam.title }} | Smart Study AI{% endblock %}
+{% block title %}{{ exam.title }} | Smart Study{% endblock %}
 {% block content %}
 <span class="badge text-bg-primary">{{ exam.subject }}</span>
 <h1 class="mt-2">{{ exam.title }}</h1>
-<p class="lead">Exam date: {{ exam.exam_date }}</p>
+<p class="lead">Дата на изпита: {{ exam.exam_date|date:"d.m.Y" }}</p>
 <div class="row g-4">
     <div class="col-md-5">
         <div class="card shadow-sm h-100"><div class="card-body">
-            <h2 class="h4">Days Remaining</h2>
+            <h2 class="h4">Оставащи дни</h2>
             <p class="display-5 fw-bold">{{ days_remaining }}</p>
-            {% if days_remaining < 0 %}<p class="text-danger">This exam date has passed.</p>{% endif %}
+            {% if days_remaining < 0 %}<p class="text-danger">Тази дата на изпита е изтекла.</p>{% endif %}
         </div></div>
     </div>
     <div class="col-md-7">
         <div class="card shadow-sm h-100"><div class="card-body">
-            <h2 class="h4">Preparedness</h2>
-            <div class="progress my-3" role="progressbar" aria-label="Preparedness">
+            <h2 class="h4">Готовност</h2>
+            <div class="progress my-3" role="progressbar" aria-label="Готовност">
                 <div class="progress-bar bg-success" style="width: {{ preparedness }}%">{{ preparedness|floatformat:0 }}%</div>
             </div>
             <p class="mb-0">{{ recommendation }}</p>
@@ -23,7 +23,7 @@
     </div>
 </div>
 <div class="card shadow-sm mt-4"><div class="card-body">
-    <h2 class="h4">Study Plan</h2>
+    <h2 class="h4">Учебен план</h2>
     <ol class="mb-0">
         {% for step in study_plan %}<li class="mb-2">{{ step }}</li>{% endfor %}
     </ol>

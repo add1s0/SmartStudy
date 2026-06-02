@@ -24,7 +24,7 @@ function startTimer() {
         } else {
             clearInterval(timerInterval);
             timerInterval = null;
-            alert("Focus session complete. Take a short break!");
+            alert("Фокус сесията приключи. Почини си за малко!");
         }
     }, 1000);
 }

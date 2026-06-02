@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Add Exam | Smart Study AI{% endblock %}
+{% block title %}Нов изпит | Smart Study{% endblock %}
 {% block content %}
 <div class="row justify-content-center"><div class="col-lg-7">
     <div class="card shadow-sm"><div class="card-body p-4">
-        <h1 class="h3">Add Exam</h1>
+        <h1 class="h3">Нов изпит</h1>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button class="btn btn-accent" type="submit">Save Exam</button>
-            <a class="btn btn-outline-secondary" href="{% url 'exam_list' %}">Cancel</a>
+            <button class="btn btn-accent" type="submit">Запази изпита</button>
+            <a class="btn btn-outline-secondary" href="{% url 'exam_list' %}">Отказ</a>
         </form>
     </div></div>
 </div></div>

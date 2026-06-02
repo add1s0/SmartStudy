@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Flashcards | Smart Study AI{% endblock %}
+{% block title %}Флашкарти | Smart Study{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div><h1>Flashcards</h1><p class="text-muted mb-0">{{ material.title }}</p></div>
-    <a class="btn btn-outline-primary" href="{% url 'material_detail' material.id %}">Back to Material</a>
+    <div><h1>Флашкарти</h1><p class="text-muted mb-0">{{ material.title }}</p></div>
+    <a class="btn btn-outline-primary" href="{% url 'material_detail' material.id %}">Назад към материала</a>
 </div>
 <div class="row g-4">
     {% for card in material.flashcards.all %}
@@ -11,22 +11,22 @@
             <div class="card flashcard shadow-sm h-100">
                 <div class="card-body">
                     <p class="fw-bold">{{ card.question }}</p>
-                    <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#answer{{ card.id }}">Show Answer</button>
+                    <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#answer{{ card.id }}">Покажи отговор</button>
                     <div class="collapse mt-3" id="answer{{ card.id }}">
                         <p>{{ card.answer }}</p>
                         <form method="post" class="d-flex gap-2">
                             {% csrf_token %}
                             <input type="hidden" name="flashcard_id" value="{{ card.id }}">
-                            <button class="btn btn-success btn-sm" name="answer" value="known">I Know</button>
-                            <button class="btn btn-outline-danger btn-sm" name="answer" value="unknown">I Don't Know</button>
+                            <button class="btn btn-success btn-sm" name="answer" value="known">Знам</button>
+                            <button class="btn btn-outline-danger btn-sm" name="answer" value="unknown">Не знам</button>
                         </form>
                     </div>
                 </div>
-                <div class="card-footer bg-white small text-muted">Known: {{ card.known_count }} | Review: {{ card.unknown_count }}</div>
+                <div class="card-footer bg-white small text-muted">Знам: {{ card.known_count }} | Преглед: {{ card.unknown_count }}</div>
             </div>
         </div>
     {% empty %}
-        <p>No flashcards were generated. Add longer sentences to your notes and edit the material.</p>
+        <p>Не бяха генерирани флашкарти. Добави по-дълги изречения в бележките си и редактирай материала.</p>
     {% endfor %}
 </div>
 {% endblock %}

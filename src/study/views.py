@@ -65,6 +65,22 @@ def _create_generated_content(material: StudyMaterial) -> None:
     )
 
 
+def _ensure_localized_generated_content(material: StudyMaterial) -> None:
+    """Regenerate study content if old prompts are still stored."""
+    has_old_flashcards = material.flashcards.filter(
+        question__contains="Complete this statement"
+    ).exists()
+    has_old_quiz_questions = material.quiz_questions.filter(
+        question__contains="Which statement correctly describes"
+    ).exists() or material.quiz_questions.filter(
+        question__contains="Кое твърдение описва правилно тема"
+    ).exists()
+    if has_old_flashcards or has_old_quiz_questions:
+        material.flashcards.all().delete()
+        material.quiz_questions.all().delete()
+        _create_generated_content(material)
+
+
 @login_required
 def material_create(request: HttpRequest) -> HttpResponse:
     """Add material and automatically generate study activities."""
@@ -78,7 +94,7 @@ def material_create(request: HttpRequest) -> HttpResponse:
             return redirect("material_detail", material_id=material.id)
     else:
         form = StudyMaterialForm()
-    return render(request, "study/material_form.html", {"form": form, "title": "Add Material"})
+    return render(request, "study/material_form.html", {"form": form, "title": "Нов материал"})
 
 
 @login_required
@@ -102,7 +118,7 @@ def material_edit(request: HttpRequest, material_id: int) -> HttpResponse:
             return redirect("material_detail", material_id=material.id)
     else:
         form = StudyMaterialForm(instance=material)
-    return render(request, "study/material_form.html", {"form": form, "title": "Edit Material"})
+    return render(request, "study/material_form.html", {"form": form, "title": "Редактирай материал"})
 
 
 @login_required
@@ -119,6 +135,7 @@ def material_delete(request: HttpRequest, material_id: int) -> HttpResponse:
 def study_mode(request: HttpRequest, material_id: int) -> HttpResponse:
     """Show flashcards and record known or unknown responses."""
     material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    _ensure_localized_generated_content(material)
     if request.method == "POST":
         flashcard = get_object_or_404(Flashcard, id=request.POST.get("flashcard_id"), material=material)
         if request.POST.get("answer") == "known":
@@ -134,6 +151,7 @@ def study_mode(request: HttpRequest, material_id: int) -> HttpResponse:
 def quiz_mode(request: HttpRequest, material_id: int) -> HttpResponse:
     """Display a quiz, calculate its score, and save the result."""
     material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    _ensure_localized_generated_content(material)
     questions = list(material.quiz_questions.all())
     if request.method == "POST":
         score = sum(
@@ -150,11 +168,11 @@ def quiz_mode(request: HttpRequest, material_id: int) -> HttpResponse:
             percentage=percentage,
         )
         if percentage >= 80:
-            recommendation = "Excellent preparation"
+            recommendation = "Отлична подготовка"
         elif percentage >= 50:
-            recommendation = "More revision recommended"
+            recommendation = "Препоръчва се още повторение"
         else:
-            recommendation = "Study the material again"
+            recommendation = "Прегледай материала отново"
         return render(
             request,
             "study/quiz_result.html",
@@ -215,22 +233,22 @@ def exam_detail(request: HttpRequest, exam_id: int) -> HttpResponse:
     exam = get_object_or_404(Exam, id=exam_id, user=request.user)
     preparedness = _preparedness(exam.material)
     if preparedness >= 80:
-        recommendation = "Ready for exam"
+        recommendation = "Готов за изпит"
     elif preparedness >= 50:
-        recommendation = "Need some revision"
+        recommendation = "Нуждае се от допълнителен преговор"
     else:
-        recommendation = "Need more preparation"
+        recommendation = "Нуждаеш се от повече подготовка"
     context = {
         "exam": exam,
         "days_remaining": (exam.exam_date - date.today()).days,
         "preparedness": preparedness,
         "recommendation": recommendation,
         "study_plan": [
-            "Review Material",
-            "Flashcards",
-            "Quiz Practice",
-            "Review Mistakes",
-            "Final Revision",
+            "Преглед на материала",
+            "Флашкарти",
+            "Практика с тестове",
+            "Преглед на грешките",
+            "Крайно повторение",
         ],
     }
     return render(request, "study/exam_detail.html", context)
