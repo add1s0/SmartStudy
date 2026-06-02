@@ -1,62 +1,313 @@
 :root {
-    --dark-blue: #12355b;
-    --light-blue: #eaf4ff;
-    --green: #2f9e62;
+    --black: #000000;
+    --brown: #91766E;
+    --rosy: #C8A19C;
+    --white: #FFFFFF;
+    --beige: #E4D8CB;
 }
 
 body {
-    background: #f7fbff;
-    color: #18324b;
+    background: var(--white);
+    color: var(--black);
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+label,
+small,
+li {
+    color: var(--black);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+a,
+a:hover {
+    color: var(--brown);
 }
 
 .navbar {
-    background: var(--dark-blue);
+    background: var(--brown);
+    border-bottom: 3px solid var(--rosy);
+}
+
+.navbar-brand,
+.navbar-brand:hover,
+.nav-link,
+.nav-link:hover,
+.nav-link:focus {
+    color: var(--white);
+}
+
+.navbar-brand {
+    align-items: center;
+    display: flex;
+    gap: 0.6rem;
+}
+
+.brand-mark {
+    align-items: center;
+    background: var(--rosy);
+    border: 2px solid var(--white);
+    border-radius: 50%;
+    display: inline-flex;
+    height: 2rem;
+    justify-content: center;
+    width: 2rem;
+}
+
+.nav-link {
+    border-radius: 2rem;
+    font-weight: 600;
+    margin: 0 0.08rem;
+    padding-left: 0.8rem !important;
+    padding-right: 0.8rem !important;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+    background: var(--rosy);
+}
+
+.navbar-toggler {
+    border: 2px solid var(--white);
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem var(--rosy);
+}
+
+.navbar-toggler-icon {
+    background-image: none;
+    border-bottom: 3px solid var(--white);
+    border-top: 3px solid var(--white);
+    height: 1rem;
+    position: relative;
+}
+
+.navbar-toggler-icon::after {
+    border-top: 3px solid var(--white);
+    content: "";
+    left: 0;
+    position: absolute;
+    top: 0.32rem;
+    width: 100%;
 }
 
 .hero {
-    background: var(--light-blue);
-    border-radius: 1.5rem;
+    background: var(--beige);
+    border: 3px solid var(--rosy);
+    border-radius: 2rem;
+    overflow: hidden;
+    padding: 5.5rem 2rem;
+    position: relative;
+}
+
+.hero .row {
+    position: relative;
+    z-index: 1;
+}
+
+.hero h1 {
+    color: var(--black);
+    font-size: clamp(3rem, 8vw, 5rem);
+}
+
+.hero-decoration {
+    background: var(--rosy);
+    border-radius: 50%;
+    position: absolute;
+}
+
+.hero-decoration-one {
+    height: 15rem;
+    left: -5rem;
+    top: -5rem;
+    width: 15rem;
+}
+
+.hero-decoration-two {
+    bottom: -6rem;
+    height: 18rem;
+    right: -4rem;
+    width: 18rem;
+}
+
+.hero-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.hero-features span {
+    background: var(--white);
+    border: 2px solid var(--rosy);
+    border-radius: 2rem;
+    color: var(--black);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.45rem 0.85rem;
 }
 
 .card {
-    border: 0;
-    border-radius: 1rem;
+    background: var(--white);
+    border: 2px solid var(--beige);
+    border-radius: 1.2rem;
+    box-shadow: 0 8px 0 var(--beige) !important;
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
 }
 
 .dashboard-card {
-    border-top: 4px solid var(--green);
+    border-top: 5px solid var(--rosy);
 }
 
-.btn-accent {
-    background: var(--green);
-    border-color: var(--green);
-    color: white;
+.btn {
+    border-radius: 2rem;
+    border-width: 2px;
+    font-weight: 700;
+    padding: 0.55rem 1rem;
 }
 
-.btn-accent:hover {
-    background: #278653;
-    border-color: #278653;
-    color: white;
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-accent,
+.btn-primary,
+.btn-danger {
+    background: var(--brown);
+    border-color: var(--brown);
+    color: var(--white);
+}
+
+.btn-accent:hover,
+.btn-primary:hover,
+.btn-danger:hover {
+    background: var(--rosy);
+    border-color: var(--brown);
+    color: var(--black);
+}
+
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-danger,
+.btn-outline-light {
+    background: var(--white);
+    border-color: var(--brown);
+    color: var(--brown);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover,
+.btn-outline-danger:hover,
+.btn-outline-light:hover {
+    background: var(--brown);
+    border-color: var(--brown);
+    color: var(--white);
+}
+
+.badge.text-bg-primary,
+.badge.text-bg-success {
+    background: var(--beige) !important;
+    border: 1px solid var(--rosy);
+    color: var(--black) !important;
+    font-weight: 700;
+    padding: 0.5rem 0.75rem;
 }
 
 input,
 textarea,
 select {
+    background: var(--white);
+    border: 2px solid var(--beige);
+    border-radius: 0.75rem;
+    color: var(--black);
     display: block;
+    padding: 0.65rem 0.8rem;
     width: 100%;
-    padding: 0.55rem 0.75rem;
-    border: 1px solid #ced4da;
-    border-radius: 0.375rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--brown);
+    box-shadow: 0 0 0 0.2rem var(--beige);
+    outline: 0;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--brown);
+}
+
+.form-check-input {
+    display: inline-block;
+    padding: 0;
+    width: 1em;
+}
+
+.form-check-input:checked {
+    background-color: var(--brown);
+    border-color: var(--brown);
+}
+
+.helptext,
+.text-muted,
+footer {
+    color: var(--brown) !important;
 }
 
 .helptext {
-    color: #6c757d;
     display: block;
     font-size: 0.85rem;
 }
 
-.errorlist {
-    color: #b02a37;
+.errorlist,
+.text-danger {
+    color: var(--black) !important;
+}
+
+.text-primary {
+    color: var(--brown) !important;
+}
+
+.alert-info {
+    background: var(--beige);
+    border-color: var(--rosy);
+    color: var(--black);
+}
+
+.progress {
+    background: var(--beige);
+    border: 2px solid var(--rosy);
+    border-radius: 2rem;
+    height: 1.35rem;
+}
+
+.progress-bar.bg-success {
+    background: var(--brown) !important;
+    color: var(--white);
 }
 
 .content-text {
@@ -64,7 +315,18 @@ select {
 }
 
 .timer {
-    color: var(--dark-blue);
-    font-size: 5rem;
+    color: var(--brown);
+    font-size: clamp(4rem, 14vw, 6rem);
     font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+@media (max-width: 576px) {
+    .hero {
+        padding: 4.5rem 1.25rem;
+    }
+
+    .btn {
+        margin-bottom: 0.3rem;
+    }
 }
