@@ -3,7 +3,6 @@ from django.db import models
 
 
 class StudyMaterial(models.Model):
-    """Text a user wants to study."""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
@@ -13,12 +12,11 @@ class StudyMaterial(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.title
+        return self.title 
 
 
 class QuizQuestion(models.Model):
-    """A generated multiple-choice question."""
-
+   
     material = models.ForeignKey(
         StudyMaterial, on_delete=models.CASCADE, related_name="quiz_questions"
     )
@@ -33,7 +31,6 @@ class QuizQuestion(models.Model):
 
 
 class QuizResult(models.Model):
-    """A saved quiz attempt."""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     material = models.ForeignKey(
@@ -49,7 +46,6 @@ class QuizResult(models.Model):
 
 
 class Exam(models.Model):
-    """An upcoming exam connected to study material."""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)

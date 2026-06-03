@@ -1,5 +1,6 @@
 import random
 from datetime import date
+from typing import Any
 
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,18 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import ExamForm, RegisterForm, StudyMaterialForm
 from .models import Exam, QuizQuestion, QuizResult, StudyMaterial
 from .utils import generate_quiz_questions, generate_summary
+
+STUDY_PLAN = [
+    "Преглед на материала",
+    "Практика с тестове",
+    "Преглед на грешките",
+    "Крайно повторение",
+]
+
+OLD_QUIZ_PROMPTS = [
+    "Which statement correctly describes",
+    "Кое твърдение описва правилно тема",
+]
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -50,6 +63,21 @@ def material_list(request: HttpRequest) -> HttpResponse:
     return render(request, "study/material_list.html", {"materials": materials})
 
 
+def _get_user_material(request: HttpRequest, material_id: int) -> StudyMaterial:
+    """Return a material only if it belongs to the signed-in user."""
+    return get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+
+
+def _get_user_exam(request: HttpRequest, exam_id: int) -> Exam:
+    """Return an exam only if it belongs to the signed-in user."""
+    return get_object_or_404(Exam, id=exam_id, user=request.user)
+
+
+def _average_quiz_score(material: StudyMaterial) -> float:
+    """Return the material's average quiz score."""
+    return material.quiz_results.aggregate(Avg("percentage"))["percentage__avg"] or 0
+
+
 def _create_generated_content(material: StudyMaterial) -> None:
     """Create a summary and quiz questions for one material."""
     material.summary = generate_summary(material.content)
@@ -64,14 +92,72 @@ def _create_generated_content(material: StudyMaterial) -> None:
 
 def _ensure_localized_generated_content(material: StudyMaterial) -> None:
     """Regenerate study content if old prompts are still stored."""
-    has_old_quiz_questions = material.quiz_questions.filter(
-        question__contains="Which statement correctly describes"
-    ).exists() or material.quiz_questions.filter(
-        question__contains="Кое твърдение описва правилно тема"
-    ).exists()
+    has_old_quiz_questions = any(
+        material.quiz_questions.filter(question__contains=prompt).exists()
+        for prompt in OLD_QUIZ_PROMPTS
+    )
     if has_old_quiz_questions:
         material.quiz_questions.all().delete()
         _create_generated_content(material)
+
+
+def _prepare_quiz_questions(questions: list[QuizQuestion]) -> None:
+    """Add shuffled answer options to quiz questions for the template."""
+    for question in questions:
+        question.options = [
+            question.correct_answer,
+            question.wrong_answer1,
+            question.wrong_answer2,
+            question.wrong_answer3,
+        ]
+        random.shuffle(question.options)
+
+
+def _calculate_quiz_score(request: HttpRequest, questions: list[QuizQuestion]) -> int:
+    """Count the correct answers submitted by the user."""
+    return sum(
+        request.POST.get(f"question_{question.id}") == question.correct_answer
+        for question in questions
+    )
+
+
+def _percentage(score: int, total: int) -> float:
+    """Calculate percentage and avoid division by zero."""
+    return (score / total * 100) if total else 0
+
+
+def _quiz_recommendation(percentage: float) -> str:
+    """Return a study recommendation based on a quiz percentage."""
+    if percentage >= 80:
+        return "Отлична подготовка"
+    if percentage >= 50:
+        return "Препоръчва се още повторение"
+    return "Прегледай материала отново"
+
+
+def _exam_recommendation(preparedness: float) -> str:
+    """Return an exam recommendation based on preparedness."""
+    if preparedness >= 80:
+        return "Готов за изпит"
+    if preparedness >= 50:
+        return "Нуждае се от допълнителен преговор"
+    return "Нуждаеш се от повече подготовка"
+
+
+def _quiz_result_context(
+    material: StudyMaterial,
+    score: int,
+    total: int,
+    percentage: float,
+) -> dict[str, Any]:
+    """Build the template context for a completed quiz."""
+    return {
+        "material": material,
+        "score": score,
+        "total": total,
+        "percentage": percentage,
+        "recommendation": _quiz_recommendation(percentage),
+    }
 
 
 @login_required
@@ -93,14 +179,14 @@ def material_create(request: HttpRequest) -> HttpResponse:
 @login_required
 def material_detail(request: HttpRequest, material_id: int) -> HttpResponse:
     """Show one material owned by the signed-in student."""
-    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    material = _get_user_material(request, material_id)
     return render(request, "study/material_detail.html", {"material": material})
 
 
 @login_required
 def material_edit(request: HttpRequest, material_id: int) -> HttpResponse:
     """Edit material and regenerate its activities when the text changes."""
-    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    material = _get_user_material(request, material_id)
     if request.method == "POST":
         form = StudyMaterialForm(request.POST, instance=material)
         if form.is_valid():
@@ -116,7 +202,7 @@ def material_edit(request: HttpRequest, material_id: int) -> HttpResponse:
 @login_required
 def material_delete(request: HttpRequest, material_id: int) -> HttpResponse:
     """Delete a material after confirmation."""
-    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    material = _get_user_material(request, material_id)
     if request.method == "POST":
         material.delete()
         return redirect("material_list")
@@ -126,16 +212,13 @@ def material_delete(request: HttpRequest, material_id: int) -> HttpResponse:
 @login_required
 def quiz_mode(request: HttpRequest, material_id: int) -> HttpResponse:
     """Display a quiz, calculate its score, and save the result."""
-    material = get_object_or_404(StudyMaterial, id=material_id, user=request.user)
+    material = _get_user_material(request, material_id)
     _ensure_localized_generated_content(material)
     questions = list(material.quiz_questions.all())
     if request.method == "POST":
-        score = sum(
-            request.POST.get(f"question_{question.id}") == question.correct_answer
-            for question in questions
-        )
+        score = _calculate_quiz_score(request, questions)
         total = len(questions)
-        percentage = (score / total * 100) if total else 0
+        percentage = _percentage(score, total)
         QuizResult.objects.create(
             user=request.user,
             material=material,
@@ -143,31 +226,12 @@ def quiz_mode(request: HttpRequest, material_id: int) -> HttpResponse:
             total_questions=total,
             percentage=percentage,
         )
-        if percentage >= 80:
-            recommendation = "Отлична подготовка"
-        elif percentage >= 50:
-            recommendation = "Препоръчва се още повторение"
-        else:
-            recommendation = "Прегледай материала отново"
         return render(
             request,
             "study/quiz_result.html",
-            {
-                "material": material,
-                "score": score,
-                "total": total,
-                "percentage": percentage,
-                "recommendation": recommendation,
-            },
+            _quiz_result_context(material, score, total, percentage),
         )
-    for question in questions:
-        question.options = [
-            question.correct_answer,
-            question.wrong_answer1,
-            question.wrong_answer2,
-            question.wrong_answer3,
-        ]
-        random.shuffle(question.options)
+    _prepare_quiz_questions(questions)
     return render(request, "study/quiz_mode.html", {"material": material, "questions": questions})
 
 
@@ -195,31 +259,20 @@ def exam_create(request: HttpRequest) -> HttpResponse:
 
 def _preparedness(material: StudyMaterial) -> float:
     """Calculate preparedness from the average quiz score."""
-    return material.quiz_results.aggregate(Avg("percentage"))["percentage__avg"] or 0
+    return _average_quiz_score(material)
 
 
 @login_required
 def exam_detail(request: HttpRequest, exam_id: int) -> HttpResponse:
     """Show exam readiness and a simple study plan."""
-    exam = get_object_or_404(Exam, id=exam_id, user=request.user)
+    exam = _get_user_exam(request, exam_id)
     preparedness = _preparedness(exam.material)
-    if preparedness >= 80:
-        recommendation = "Готов за изпит"
-    elif preparedness >= 50:
-        recommendation = "Нуждае се от допълнителен преговор"
-    else:
-        recommendation = "Нуждаеш се от повече подготовка"
     context = {
         "exam": exam,
         "days_remaining": (exam.exam_date - date.today()).days,
         "preparedness": preparedness,
-        "recommendation": recommendation,
-        "study_plan": [
-            "Преглед на материала",
-            "Практика с тестове",
-            "Преглед на грешките",
-            "Крайно повторение",
-        ],
+        "recommendation": _exam_recommendation(preparedness),
+        "study_plan": STUDY_PLAN,
     }
     return render(request, "study/exam_detail.html", context)
 
