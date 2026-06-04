@@ -1,65 +1,48 @@
-# Smart Study
+Smart Study
 
-Smart Study is a beginner-friendly Django web application for organizing study
-materials and preparing for exams. It creates summaries and quizzes
-from a student's notes using simple Python functions. It does not use an external
-AI service.
+Smart Study е Django уеб приложение, подходящо за начинаещи, което помага за организиране на учебни материали и подготовка за изпити. То създава обобщения и тестове от бележките на ученика чрез прости Python функции. Не използва външна AI услуга.
 
-## Features
+Функционалности
+Регистрация, вход и изход от системата
+Лични учебни материали с пълни операции за създаване, четене, редакция и изтриване (CRUD)
+Автоматично генерирани обобщения и тестове с въпроси с избираем отговор
+Запазване на резултати от тестове с препоръки
+Проследяване на изпити, оценка на подготовката и прост учебен план
+Страница със статистики и прогрес барове
+Таймер Pomodoro (25 минути), работещ в браузъра
+Django админ панел
+Технологии
+Python
+Django
+SQLite
+Bootstrap 5
+HTML, CSS и малко JavaScript
+pytest за тестове по време на разработка
+Инсталация
 
-- Register, login, and logout
-- Private study materials with full create, read, update, and delete actions
-- Automatically generated summaries and multiple-choice quizzes
-- Saved quiz results with recommendations
-- Exam tracking, preparedness score, and a simple study plan
-- Statistics page with progress bars
-- Browser-based 25-minute Pomodoro timer
-- Django admin site
+Отвори терминал в основната директория на проекта и изпълни:
 
-## Technologies
-
-- Python
-- Django
-- SQLite
-- Bootstrap 5
-- HTML, CSS, and a small amount of JavaScript
-- pytest for development tests
-
-## Installation
-
-Open a terminal in the project root and run:
-
-```powershell
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 cd src
 python manage.py migrate
-```
+Стартиране на приложението
 
-## Running The Application
+От папката src, изпълни:
 
-From the `src` folder, run:
-
-```powershell
 python manage.py createsuperuser
 python manage.py runserver
-```
 
-Open `http://127.0.0.1:8000/` in a browser.
+Отвори http://127.0.0.1:8000/ в браузър.
 
-## Running Tests
+Стартиране на тестове
 
-Install the development requirements from the project root, then run pytest:
+Инсталирай зависимостите за разработка от основната директория на проекта, след което стартирай pytest:
 
-```powershell
 pip install -r requirements-dev.txt
 pytest
-```
-
-## Project Structure
-
-```text
+Структура на проекта
 SmartStudy/
 |-- src/
 |   |-- manage.py
@@ -74,14 +57,10 @@ SmartStudy/
 |-- requirements-dev.txt
 |-- .gitignore
 `-- README.md
-```
+Команди за първоначална настройка
 
-## First-Time Setup Commands
+Това са пълните стартови команди за проекта. Изпълнявай manage.py командите от папката src.
 
-These are the complete startup commands requested for the project. Run the
-`manage.py` commands from inside the `src` folder.
-
-```powershell
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
@@ -90,4 +69,3 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
-```
