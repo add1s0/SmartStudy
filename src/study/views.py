@@ -1,6 +1,5 @@
 import random
 from datetime import date
-from typing import Any
 
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -144,22 +143,6 @@ def _exam_recommendation(preparedness: float) -> str:
     return "Нуждаеш се от повече подготовка"
 
 
-def _quiz_result_context(
-    material: StudyMaterial,
-    score: int,
-    total: int,
-    percentage: float,
-) -> dict[str, Any]:
-    """Build the template context for a completed quiz."""
-    return {
-        "material": material,
-        "score": score,
-        "total": total,
-        "percentage": percentage,
-        "recommendation": _quiz_recommendation(percentage),
-    }
-
-
 @login_required
 def material_create(request: HttpRequest) -> HttpResponse:
     """Add material and automatically generate study activities."""
@@ -229,7 +212,13 @@ def quiz_mode(request: HttpRequest, material_id: int) -> HttpResponse:
         return render(
             request,
             "study/quiz_result.html",
-            _quiz_result_context(material, score, total, percentage),
+            {
+                "material": material,
+                "score": score,
+                "total": total,
+                "percentage": percentage,
+                "recommendation": _quiz_recommendation(percentage),
+            },
         )
     _prepare_quiz_questions(questions)
     return render(request, "study/quiz_mode.html", {"material": material, "questions": questions})
@@ -257,16 +246,11 @@ def exam_create(request: HttpRequest) -> HttpResponse:
     return render(request, "study/exam_form.html", {"form": form})
 
 
-def _preparedness(material: StudyMaterial) -> float:
-    """Calculate preparedness from the average quiz score."""
-    return _average_quiz_score(material)
-
-
 @login_required
 def exam_detail(request: HttpRequest, exam_id: int) -> HttpResponse:
     """Show exam readiness and a simple study plan."""
     exam = _get_user_exam(request, exam_id)
-    preparedness = _preparedness(exam.material)
+    preparedness = _average_quiz_score(exam.material)
     context = {
         "exam": exam,
         "days_remaining": (exam.exam_date - date.today()).days,
